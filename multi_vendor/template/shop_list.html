@@ -1,0 +1,36 @@
+{% load static %}
+{% include 'custheader.html' %}  <!-- Include customer header -->
+
+<div class="container mt-5">
+    <h2 class="text-center">Available Shops</h2>
+    
+    <div class="row">
+        {% for shop in shops %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                {% if shop.userphoto %}
+                    <img src="{{ shop.userphoto.url }}" class="card-img-top" height="200px" alt="Shop Image">
+                {% else %}
+                    <img src="{% static 'img/default-shop.png' %}" class="card-img-top" alt="Default Shop Image">
+                {% endif %}
+                
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ shop.shopname }}</h5>
+                    <p class="card-text"><strong>Owner:</strong> {{ shop.ownername }}</p>
+                    <p class="card-text"><strong>Location:</strong> {{ shop.useraddress }}</p>
+                    {% if shop.license %}
+                     <p>License: <a href="{{ shop.license.url }}" target="_blank">View License</a></p>
+                    {% else %}
+                    <p>No license uploaded.</p>
+                    {% endif %}
+                    <a href="{% url 'shop_details' shop.id %}" class="btn btn-primary">View Products</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p class="text-center">No shops available.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% include 'footer.html' %}

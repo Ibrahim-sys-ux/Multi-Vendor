@@ -1,0 +1,40 @@
+{% load static %}
+{% include 'shopheader.html' %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">{{ shop.shopname }} - My Products</h2>
+
+    <div class="text-right mb-3">
+        <a href="{% url 'shop_add_product' %}" class="btn btn-primary">+ Add New Product</a>
+    </div>
+
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" height="200px" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'img/no-image.jpg' %}" class="card-img-top" alt="No Image">
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                    <p class="card-text"><strong>Price:</strong> ₹{{ product.price }}</p>
+                    <p class="card-text"><strong>Stock:</strong> {{ product.stock }}</p>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'shop_edit_product' product.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'shop_delete_product' product.id %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p>No products found. <a href="{% url 'shop_add_product' %}">Add a new product</a>.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% include 'footer.html' %}

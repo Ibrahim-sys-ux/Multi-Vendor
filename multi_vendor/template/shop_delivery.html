@@ -1,0 +1,101 @@
+{% load static %}
+{% include 'shopheader.html' %}
+
+<style>
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h2 {
+        text-align: center;
+        color: #FFD333;
+        margin-bottom: 20px;
+    }
+
+    .table img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+
+    .actions select, .actions button {
+        margin: 5px;
+        display: inline-block;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2>Delivery Management</h2>
+
+    {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Delivery Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.product.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>₹{{ order.total_price }}</td>
+                <td>
+                    <span class="badge 
+                        {% if order.delivery_status == 'Pending' %}badge-warning
+                        {% elif order.delivery_status == 'Shipped' %}badge-primary
+                        {% elif order.delivery_status == 'Delivered' %}badge-success
+                        {% elif order.delivery_status == 'Cancelled' %}badge-danger
+                        {% endif %}">
+                        {{ order.delivery_status }}
+                    </span>
+                </td>
+                <td class="actions">
+                    {% if order.is_paid %}
+                        <span class="text-danger">Paid - Cannot Update</span>
+                    {% else %}
+                        <form method="POST" action="{% url 'update_delivery_status' order.id %}">
+                            {% csrf_token %}
+                            <select name="delivery_status" class="form-control">
+                                <option value="Pending" {% if order.delivery_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="Shipped" {% if order.delivery_status == "Shipped" %}selected{% endif %}>Shipped</option>
+                                <option value="Delivered" {% if order.delivery_status == "Delivered" %}selected{% endif %}>Delivered</option>
+                                <option value="Cancelled" {% if order.delivery_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No deliveries available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+</div>
+
+{% include 'footer.html' %}

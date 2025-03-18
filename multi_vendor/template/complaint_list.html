@@ -1,0 +1,43 @@
+{% load static %}
+{% include 'custheader.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Your Complaints</h2>
+
+    {% if complaints %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Date Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for complaint in complaints %}
+                <tr>
+                    <td>{{ complaint.subject }}</td>
+                    <td>{{ complaint.message }}</td>
+                    <td>
+                        {% if complaint.status == 'pending' %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% elif complaint.status == 'resolved' %}
+                            <span class="badge bg-success">Resolved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ complaint.created_at|date:"F j, Y, g:i a" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have not submitted any complaints.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
+{% include 'footer.html' %}

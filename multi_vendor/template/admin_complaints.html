@@ -1,0 +1,89 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #FFD333;
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .btn {
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .resolve { background: green; }
+    .reject { background: red; }
+
+</style>
+
+<div class="container mt-4">
+    <h2>Complaint Management</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Subject</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in complaints %}
+            <tr>
+                <td>{{ complaint.id }}</td>
+                <td>{{ complaint.user.username }}</td>
+                <td>{{ complaint.subject }}</td>
+                <td>{{ complaint.message }}</td>
+                <td>{{ complaint.status }}</td>
+                <td>
+                    {% if complaint.status == "pending" %}
+                        <a href="{% url 'resolve_complaint' complaint.id %}" class="btn resolve">Resolve</a>
+                        <a href="{% url 'reject_complaint' complaint.id %}" class="btn reject">Reject</a>
+                    {% else %}
+                        <span>No Actions</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No complaints available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'footer.html' %}

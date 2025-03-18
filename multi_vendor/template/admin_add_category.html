@@ -1,0 +1,67 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<style>
+    .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #3D464D;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .btn1 {
+        width: 100%;
+        color: #FFD333;
+        background-color: #3D464D;
+        height: 40px;
+    }
+
+    .btn1:hover {
+        background-color: #FFD333;
+        color: #3D464D;
+        text-decoration: none;
+    }
+
+    .alert {
+        text-align: center;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2>Add New Category</h2>
+
+    {% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Category Name:</label>
+            <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn1">Add Category</button>
+    </form>
+</div>
+
+{% include 'footer.html' %}

@@ -1,0 +1,60 @@
+{% load static %}
+{% include 'shopheader.html' %}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Edit Shop Profile</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="shopname">Shop Name</label>
+            <input type="text" class="form-control" id="shopname" name="shopname" value="{{ shop.shopname }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ownername">Owner Name</label>
+            <input type="text" class="form-control" id="ownername" name="ownername" value="{{ shop.ownername }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="usercontact">Contact Number</label>
+            <input type="text" class="form-control" id="usercontact" name="usercontact" value="{{ shop.usercontact }}" 
+                   pattern="\d{10}" title="Enter a valid 10-digit contact number" required>
+        </div>
+
+        <div class="form-group">
+            <label for="useraddress">Address</label>
+            <textarea class="form-control" id="useraddress" name="useraddress" rows="3" required>{{ shop.useraddress }}</textarea>
+        </div>
+
+        <!-- Shop Photo Upload Section -->
+        <div class="form-group">
+            <label for="userphoto">Shop Photo</label><br>
+            {% if shop.userphoto %}
+                <img src="{{ shop.userphoto.url }}" alt="Shop Photo" class="img-thumbnail mb-3" width="150">
+            {% else %}
+                <p>No photo uploaded</p>
+            {% endif %}
+            <input type="file" class="form-control-file" id="userphoto" name="userphoto">
+        </div>
+
+        <!-- Shop License Upload Section -->
+        <div class="form-group">
+            <label for="license">Shop License</label><br>
+            {% if shop.license %}
+                <p>Current License: <a href="{{ shop.license.url }}" target="_blank">View License</a></p>
+            {% else %}
+                <p>No license uploaded</p>
+            {% endif %}
+            <input type="file" class="form-control-file" id="license" name="license">
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <a href="{% url 'shop_profile' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% include 'footer.html' %}

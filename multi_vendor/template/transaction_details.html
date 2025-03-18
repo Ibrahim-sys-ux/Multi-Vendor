@@ -1,0 +1,39 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<div class="container mt-4">
+    <h2>Transaction Details</h2>
+    
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th>
+            <td>{{ transaction.id }}</td>
+        </tr>
+        <tr>
+            <th>User</th>
+            <td>{{ transaction.useremail }}</td>
+        </tr>
+        <tr>
+            <th>Amount</th>
+            <td>${{ transaction.amount }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>
+                {% if transaction.status == "completed" %}
+                    <span class="badge badge-success">Completed</span>
+                {% elif transaction.status == "pending" %}
+                    <span class="badge badge-warning">Pending</span>
+                {% else %}
+                    <span class="badge badge-danger">Failed</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Transaction Date</th>
+            <td>{{ transaction.transaction_date }}</td>
+        </tr>
+    </table>
+</div>
+
+{% include 'footer.html' %}

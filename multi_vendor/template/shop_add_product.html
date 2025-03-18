@@ -1,0 +1,16 @@
+{% load static %}
+{% include 'shopheader.html' %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Add New Product</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-success">Save Product</button>
+        <a href="{% url 'shop_product_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+{% include 'footer.html' %}

@@ -1,0 +1,46 @@
+{% load static %}
+{% include 'header.html' %}
+
+<!-- Vendor Management Start -->
+<div class="container-fluid pt-5">
+    <div class="row px-xl-5">
+        <div class="col-lg-12">
+            <h2 class="mb-4 text-center">Our Vendors</h2>
+            <div class="row">
+                {% for vendor in vendors %}
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
+                        <div class="position-relative">
+                            <img src="{{ vendor.userphoto.url }}" class="card-img-top" alt="Vendor Image" style="height: 250px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 bg-primary text-white px-3 py-1 rounded-start">
+                                {{ vendor.ownername }}
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold text-dark">{{ vendor.shopname }}</h5>
+                            <p class="card-text text-muted small">
+                                <i class="fas fa-envelope"></i> {{ vendor.useremail }} <br>
+                                <i class="fas fa-phone"></i> {{ vendor.usercontact }} <br>
+                                {% if vendor.license %}
+                                <p>License: <a href="{{ vendor.license.url }}" target="_blank">View License</a></p>
+                               {% else %}
+                               <p>No license uploaded.</p>
+                               {% endif %}
+                                <i class="fas fa-map-marker-alt"></i> {{ vendor.useraddress }}
+                            </p>
+                            <a href="{% url 'hshop_details' vendor.id %}" class="btn btn-outline-primary rounded-pill px-4">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No vendors available</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Vendor Management End -->
+
+{% include 'footer.html' %}

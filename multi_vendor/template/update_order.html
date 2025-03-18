@@ -1,0 +1,59 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #FFD333;
+        margin-bottom: 20px;
+    }
+
+    select, input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+        color: white;
+        background-color: #28a745;
+        border: none;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="form-container mt-4">
+    <h2>Update Order</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label>Order Status:</label>
+        <select name="status">
+            <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
+            <option value="Processing" {% if order.status == "Processing" %}selected{% endif %}>Processing</option>
+            <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>Shipped</option>
+            <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>
+            <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+        </select>
+
+        <button type="submit" class="btn-submit">Update Order</button>
+    </form>
+</div>
+
+{% include 'footer.html' %}

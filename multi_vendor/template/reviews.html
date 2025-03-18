@@ -1,0 +1,49 @@
+{% load static %}
+{% include 'custheader.html' %} <!-- Ensure it extends your main template -->
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Reviews for {{ product.name }}</h2>
+
+    <!-- Display Existing Reviews -->
+    <div class="card p-3 mb-4">
+        <h4>Customer Reviews</h4>
+        {% for review in reviews %}
+            <div class="border p-2 mb-2">
+                <strong>{{ review.customer_name }}</strong> - 
+                <span class="text-warning">
+                    {% for _ in ''|ljust:review.rating %}★{% endfor %}
+                </span>
+                <p>{{ review.comment }}</p>
+                <small class="text-muted">{{ review.created_at }}</small>
+            </div>
+        {% empty %}
+            <p>No reviews yet. Be the first to write one!</p>
+        {% endfor %}
+    </div>
+
+    <!-- Submit a Review -->
+    <div class="card p-3">
+        <h4>Write a Review</h4>
+        <form action="{% url 'submit_review' product.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="rating">Rating:</label>
+                <select name="rating" class="form-control w-25">
+                    <option value="5">★★★★★</option>
+                    <option value="4">★★★★</option>
+                    <option value="3">★★★</option>
+                    <option value="2">★★</option>
+                    <option value="1">★</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="comment">Comment:</label>
+                <textarea name="comment" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% include 'footer.html' %}

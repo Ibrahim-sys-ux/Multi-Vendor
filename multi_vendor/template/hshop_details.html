@@ -1,0 +1,40 @@
+{% load static %}
+{% include 'header.html' %}
+
+<div class="container mt-5">
+    <h2 class="text-center">{{ shop.shopname }}</h2>
+    
+    <div class="text-center mb-4">
+        {% if shop.userphoto %}
+            <img src="{{ shop.userphoto.url }}" alt="Shop Image" height="200px" width="200px" class="rounded">
+        {% else %}
+            <img src="{% static 'img/default-shop.png' %}" alt="Default Shop" width="200" class="rounded">
+        {% endif %}
+    </div>
+
+    <h4>Products Available</h4>
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-3">
+            <div class="card mb-4">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" height="200px" alt="Product Image">
+                {% else %}
+                    <img src="{% static 'img/default-product.png' %}" class="card-img-top" alt="Default Product">
+                {% endif %}
+                
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text"><strong>Price:</strong> ₹{{ product.price }}</p>
+                    <p class="card-text">{{ product.description|truncatechars:50 }}</p>
+                    <a href="{% url 'hproduct_details' product.id %}" class="btn btn-success">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p>No products available in this shop.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% include 'footer.html' %}

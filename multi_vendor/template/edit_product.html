@@ -1,0 +1,108 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #FFD333;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+        color: white;
+        background-color: #28a745;
+        border: none;
+        border-radius: 5px;
+    }
+
+    .btn-submit:hover {
+        background-color: #218838;
+    }
+
+    .product-image {
+        display: block;
+        margin: auto;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="form-container mt-4">
+    <h2>Edit Product</h2>
+
+    {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <label>Product Name:</label>
+        <input type="text" name="name" value="{{ product.name }}" required>
+
+        <label>Description:</label>
+        <textarea name="description" required>{{ product.description }}</textarea>
+
+        <label>Price:</label>
+        <input type="number" name="price" value="{{ product.price }}" step="0.01" required>
+
+        <label>Stock:</label>
+        <input type="number" name="stock" value="{{ product.stock }}" required>
+
+        <label>Category:</label>
+        <select name="category" required>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if product.category.id == category.id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Current Image:</label><br>
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="product-image" alt="Product Image">
+        {% else %}
+        <p>No Image Available</p>
+        {% endif %}
+        <br><br>
+
+        <label>Change Image:</label>
+        <input type="file" name="image">
+
+        <button type="submit" class="btn-submit">Update Product</button>
+    </form>
+</div>
+
+{% include 'footer.html' %}

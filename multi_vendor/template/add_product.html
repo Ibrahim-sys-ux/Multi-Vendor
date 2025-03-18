@@ -1,0 +1,46 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h2 {
+        text-align: center;
+        color: #FFD333;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="form-container mt-4">
+    <h2>Add Product</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label>Name:</label>
+        <input type="text" name="name" required class="form-control">
+        
+        <label>Description:</label>
+        <textarea name="description" required class="form-control"></textarea>
+
+        <label>Price:</label>
+        <input type="number" name="price" required class="form-control">
+
+        <label>Stock:</label>
+        <input type="number" name="stock" required class="form-control">
+
+        <label>Image:</label>
+        <input type="file" name="image" class="form-control">
+
+        <br>
+        <button type="submit" class="btn btn-primary btn-block">Add Product</button>
+    </form>
+</div>
+
+{% include 'footer.html' %}

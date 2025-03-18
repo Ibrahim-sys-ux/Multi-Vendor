@@ -1,0 +1,43 @@
+{% include 'custheader.html' %}
+<style>
+    .container { width: 80%; margin: auto; }
+    .card { border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+    .card-img-top { height: 200px; object-fit: cover; border-radius: 10px 10px 0 0; }
+    .card-body { text-align: center; }
+    .reviews { margin-top: 10px; text-align: left; }
+    .review { border-top: 1px solid #eee; padding: 5px; margin-top: 5px; }
+    .rating { color: gold; }
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Product List</h2>
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="font-weight-bold">Price: ${{ product.price }}</p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <h6>Customer Reviews:</h6>
+                        <div class="reviews">
+                            {% for review in product.reviews.all %}
+                                <div class="review">
+                                    <p><strong>{{ review.customer_name }}</strong> <span class="rating">⭐ {{ review.rating }}/5</span></p>
+                                    <p>{{ review.comment }}</p>
+                                </div>
+                            {% empty %}
+                                <p>No reviews yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% include 'footer.html' %}

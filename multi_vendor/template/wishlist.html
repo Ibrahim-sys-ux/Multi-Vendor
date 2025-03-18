@@ -1,0 +1,43 @@
+{% include 'custheader.html' %} <!-- Include header -->
+  <!-- Ensure it extends your main template -->
+{% block content %}
+
+<div class="container mt-4">
+    <h2>My Wishlist</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in wishlist_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>₹{{ item.product.price }}</td>
+                <td>
+                    <form action="{% url 'add_to_cart' item.id %}" method="POST">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="1" min="1" class="form-control w-50 d-inline" required>
+                        <button type="submit" class="btn btn-success">Add to Cart</button>
+                    </form>
+                </td>
+                <td>
+                    <a href="{% url 'remove_from_wishlist' item.id %}" class="btn btn-danger">Remove</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">Your wishlist is empty.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% include 'footer.html' %} <!-- Include footer -->

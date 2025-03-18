@@ -1,0 +1,131 @@
+{% load static %}
+{% include 'shopheader.html' %}
+
+<style>
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #FFD333;
+        margin-bottom: 20px;
+    }
+
+    .summary {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        width: 30%;
+    }
+
+    .card h3 {
+        margin: 0;
+        color: #3D464D;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .table th {
+        background-color: #FFD333;
+        color: #3D464D;
+    }
+
+    .no-data {
+        text-align: center;
+        font-size: 16px;
+        color: red;
+    }
+</style>
+
+<div class="container">
+    <h2>Shop Sales & Revenue Report</h2>
+    
+    <div class="summary">
+        <div class="card">
+            <h3>Total Revenue</h3>
+            <p>${{ total_revenue }}</p>
+        </div>
+        <div class="card">
+            <h3>Total Orders</h3>
+            <p>{{ total_orders }}</p>
+        </div>
+        <div class="card">
+            <h3>Total Products Sold</h3>
+            <p>{{ total_products_sold }}</p>
+        </div>
+    </div>
+
+    <h3>Best-Selling Products</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Total Sold</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in best_selling_products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.total_sold }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" class="no-data">No sales data available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Recent Orders</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer.name }}</td>
+                <td>${{ order.total_price }}</td>
+                <td>{{ order.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="no-data">No recent orders</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'footer.html' %}

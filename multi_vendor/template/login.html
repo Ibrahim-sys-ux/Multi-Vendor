@@ -1,0 +1,92 @@
+{% load static %}
+{% include 'header.html' %}
+<style>  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height:50vh;
+    background: #3D464D !important;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 550px;
+    margin: auto;
+}
+h2 {
+    color: #FFD333;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+label {
+    margin: 5px 0 2px;
+    font-weight: bold;
+    color: #FFD333;
+}
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 5px 0 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+input:focus {
+    border-color: #ff6f91;
+}
+button {
+    padding: 10px 20px;
+    background-color: white;
+    color: #FFD333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+button:hover {
+    background-color: #FFD333;
+    color: white;
+}</style>
+<body>
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% endif %}" id="alert-message">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<script>
+    setTimeout(function(){
+        let alertBox = document.getElementById("alert-message");
+        if(alertBox) { 
+            alertBox.style.display = "none"; 
+        }
+    }, 3000);
+</script>
+
+    <div class="container">
+        <h2>Login</h2>
+        <form action="/login/" method="POST">
+            {% csrf_token %}
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+{% include 'footer.html' %}

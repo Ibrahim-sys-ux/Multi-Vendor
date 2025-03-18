@@ -1,0 +1,97 @@
+{% load static %}
+{% include 'adminheader.html' %}
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 50px; /* Add space before footer */
+}
+
+    h2 {
+        text-align: center;
+        color: #3D464D;
+        margin-bottom: 20px;
+    }
+
+    .btn1 {
+        display: block;
+        margin: auto;
+        width: 200px;
+        height: 40px;
+        text-align: center;
+        padding-top: 10px;
+        color: #FFD333;
+        background-color: #3D464D;
+    }
+    .btn1:hover{
+        background-color: #FFD333;
+        color: #3D464D;
+        text-decoration: none;
+    }
+
+    /* table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+
+    tr:hover {
+        background: #f1f1f1;
+    } */
+</style>
+
+<div class="container mt-4">
+    <h2>Category List</h2>
+
+    {% if messages %}
+    <div class="alert alert-info">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <a href="{% url 'add_category' %}" class="btn1">Add New Category</a><br/><br/>
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.id }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.description }}</td>
+                <td>{{ category.created_at }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No categories available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include 'footer.html' %}
