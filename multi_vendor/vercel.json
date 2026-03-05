@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "myproject/wsgi.py",
+      "src": "mulit_vendor/wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "myproject/wsgi.py"
+      "dest": "mulit_vendor/wsgi.py"
     }
   ]
 }
