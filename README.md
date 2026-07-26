@@ -128,6 +128,3 @@ This project is a functional prototype and has not been hardened for production 
 
 Before deploying this publicly, address the items above: hash passwords (e.g. with Django's built-in auth/password hashers), move secrets to environment variables, set `DEBUG = False`, restrict `ALLOWED_HOSTS`, and add proper authentication/permission checks to every admin and vendor view.
 
-## License
-
-No license specified yet — add one if you intend for others to use or contribute to this project.
