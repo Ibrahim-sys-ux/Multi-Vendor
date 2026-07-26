@@ -52,69 +52,29 @@ def hproduct_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     return render(request, "hproduct_details.html", {"product": product})
 
-def login(request):
-    if request.method == 'POST':
-        storage = get_messages(request)
-        for _ in storage:
-            pass
-        useremail = request.POST.get('email')
-        userpass = request.POST.get('password')
-
-        # Admin Login
-        if useremail == 'admin@gmail.com' and userpass == 'admin':
-            request.session['adminemail'] = useremail
-            request.session['admin'] = 'admin'
-            messages.success(request, "Admin login successful!")
-            return redirect('/adminhome')
-
-        # Customer Login
-        customer = custdata.objects.filter(useremail=useremail, userpass=userpass, userstatus='active').first()
-        if customer:
-            request.session['uid'] = customer.id
-            request.session['uname'] = customer.username
-            request.session['uemail'] = customer.useremail
-            request.session['user'] = 'customer'
-            messages.success(request, "Customer login successful!")
-            return render(request, 'cust_home.html', {'status': 'User login successful'})
-
-        # Vendor Login
-        vendor = shopdata.objects.filter(useremail=useremail, userpass=userpass, userstatus='active').first()
-        if vendor:
-            request.session['sid'] = vendor.id
-            request.session['sname'] = vendor.shopname
-            request.session['sownername'] = vendor.ownername
-            request.session['semail'] = vendor.useremail
-            request.session['user'] = 'vendor'
-            messages.success(request, "Vendor login successful!")
-            return redirect('/shophome')
-
-        # If no valid user is found
-        messages.error(request, "Incorrect credentials or account not active.")
-        return render(request, 'login.html', {'status': 'Incorrect credentials or inactive account'})
-
-    return render(request, "login.html")
-
-
 import re
- 
+from django.contrib.auth.hashers import make_password, check_password
+
+
 def signup1(request):
     if request.method == "POST":
         storage = get_messages(request)
         for _ in storage:
             pass
 
-        
         username = request.POST.get('fullName')
         useremail = request.POST.get('email')
         useraddress = request.POST.get('address')
         userpass = request.POST.get('password')
         confirm_password = request.POST.get("confirmPassword")
-        if custdata.objects.filter(useremail=useremail).exists() and custdata.objects.filter(userpass=userpass).exists():
-            messages.error(request, "Email or Password is already registered. Please use a different email.")
+
+        # Fixed: was checking email AND password existed together (wrong logic)
+        if custdata.objects.filter(useremail=useremail).exists():
+            messages.error(request, "Email is already registered. Please use a different email.")
             return render(request, "customerReg.html")
 
-        if shopdata.objects.filter(useremail=useremail).exists() and shopdata.objects.filter(userpass=userpass).exists():
-            messages.error(request, "Email or Password is already taken. Please choose a different password.")
+        if shopdata.objects.filter(useremail=useremail).exists():
+            messages.error(request, "Email is already registered as a vendor. Please use a different email.")
             return render(request, "customerReg.html")
 
         if not all([username, useremail, useraddress, userpass]):
@@ -134,12 +94,18 @@ def signup1(request):
         if userpass != confirm_password:
             messages.error(request, "Passwords do not match.")
             return render(request, "customerReg.html")
-        data = custdata(username=username, useremail=useremail, userpass=userpass, useraddress=useraddress,userstatus='active')
+
+        data = custdata(
+            username=username,
+            useremail=useremail,
+            userpass=make_password(userpass),   # hash before saving
+            useraddress=useraddress,
+            userstatus='active'
+        )
         data.save()
         messages.success(request, "You have successfully registered!")
-        return redirect('/login/') 
+        return redirect('/login/')
     return render(request, "customerReg.html")
-
 
 
 def signup2(request):
@@ -161,13 +127,13 @@ def signup2(request):
         confirm_password = request.POST.get("confirmPassword")
         license = request.FILES.get("license")
 
-        # Check if email or password already exists
-        if custdata.objects.filter(useremail=useremail).exists() and custdata.objects.filter(userpass=userpass).exists():
-            messages.error(request, "Email or Password is already registered. Please use a different email.")
+        # Fixed: was checking email AND password existed together (wrong logic)
+        if custdata.objects.filter(useremail=useremail).exists():
+            messages.error(request, "Email is already registered. Please use a different email.")
             return render(request, "shopReg.html")
 
-        if shopdata.objects.filter(useremail=useremail).exists() and shopdata.objects.filter(userpass=userpass).exists():
-            messages.error(request, "Email or Password is already taken. Please choose a different password.")
+        if shopdata.objects.filter(useremail=useremail).exists():
+            messages.error(request, "Email is already registered as a vendor. Please use a different email.")
             return render(request, "shopReg.html")
 
         if not shopname or not ownername or not useremail or not usercontact or not useraddress or not userpass or not confirm_password:
@@ -188,24 +154,69 @@ def signup2(request):
 
         # Save data with registration date
         data = shopdata(
-            shopname=shopname, 
-            ownername=ownername, 
+            shopname=shopname,
+            ownername=ownername,
             useremail=useremail,
             usercontact=usercontact,
-            userpass=userpass,
+            userpass=make_password(userpass),   # hash before saving
             userphoto=userphoto,
             useraddress=useraddress,
             license=license,
             userstatus='pending',
-            registered_at=now()  # Automatically stores the current timestamp
+            registered_at=now()
         )
         data.save()
 
         messages.success(request, "You have successfully registered your shop!")
-        return redirect('/login/') 
+        return redirect('/login/')
 
     return render(request, "shopReg.html")
 
+
+def login(request):
+    if request.method == 'POST':
+        storage = get_messages(request)
+        for _ in storage:
+            pass
+        useremail = request.POST.get('email')
+        userpass = request.POST.get('password')
+
+        # Admin Login — credentials now pulled from environment, not hardcoded
+        import os
+        admin_email = os.environ.get('ADMIN_EMAIL')
+        admin_password_hash = os.environ.get('ADMIN_PASSWORD_HASH')  # generate once with make_password()
+        if admin_email and useremail == admin_email and check_password(userpass, admin_password_hash or ''):
+            request.session['adminemail'] = useremail
+            request.session['admin'] = 'admin'
+            messages.success(request, "Admin login successful!")
+            return redirect('/adminhome')
+
+        # Customer Login — fetch by email/status only, then verify hash
+        customer = custdata.objects.filter(useremail=useremail, userstatus='active').first()
+        if customer and check_password(userpass, customer.userpass):
+            request.session['uid'] = customer.id
+            request.session['uname'] = customer.username
+            request.session['uemail'] = customer.useremail
+            request.session['user'] = 'customer'
+            messages.success(request, "Customer login successful!")
+            return render(request, 'cust_home.html', {'status': 'User login successful'})
+
+        # Vendor Login — same pattern
+        vendor = shopdata.objects.filter(useremail=useremail, userstatus='active').first()
+        if vendor and check_password(userpass, vendor.userpass):
+            request.session['sid'] = vendor.id
+            request.session['sname'] = vendor.shopname
+            request.session['sownername'] = vendor.ownername
+            request.session['semail'] = vendor.useremail
+            request.session['user'] = 'vendor'
+            messages.success(request, "Vendor login successful!")
+            return redirect('/shophome')
+
+        # If no valid user is found
+        messages.error(request, "Incorrect credentials or account not active.")
+        return render(request, 'login.html', {'status': 'Incorrect credentials or inactive account'})
+
+    return render(request, "login.html")
 
 def contact_view(request):
     if request.method == "POST":
