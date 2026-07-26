@@ -112,19 +112,54 @@ python manage.py runserver
 
 The app will be available at `http://127.0.0.1:8000/`.
 
-### Default Admin Login (built into the app)
-The site admin dashboard (separate from Django's own `/admin/`) is accessed via the regular login form using credentials defined in `vendor/views.py`. **Change these before deploying anywhere public.**
+### Environment Variables
+
+Passwords and admin credentials are no longer hardcoded. Create a `.env` file in the project root (and make sure it's listed in `.gitignore`) with:
+
+```
+ADMIN_EMAIL=admin@gmail.com
+ADMIN_PASSWORD_HASH=<generate with make_password(), see below>
+DJANGO_SECRET_KEY=<your-secret-key>
+DJANGO_DEBUG=False
+```
+
+Generate the admin password hash once with:
+
+```bash
+python manage.py shell -c "from django.contrib.auth.hashers import make_password; print(make_password('your-real-admin-password'))"
+```
+
+### Migrating Existing Accounts
+
+If you have accounts created before password hashing was added, run the one-off migration command to hash any remaining plaintext passwords:
+
+```bash
+python manage.py hash_existing_passwords
+```
+
+Back up your database before running this. It's safe to run more than once — already-hashed passwords are left untouched.
+
+### Default Admin Login
+The site admin dashboard (separate from Django's own `/admin/`) is accessed via the regular login form, using the `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` values set in your environment.
+
+## Security Status
+
+| Item | Status |
+|---|---|
+| Passwords hashed on signup, login, and profile update | ✅ Fixed |
+| Admin credentials moved out of source code | ✅ Fixed (requires `.env` setup above) |
+| Migration path for pre-existing plaintext passwords | ✅ Available (`hash_existing_passwords` command) |
+| Permission checks on admin/vendor views | ❌ Not yet implemented |
+| `DEBUG` / `SECRET_KEY` moved to environment variables | ❌ Not yet implemented |
+| Database driver matches configured database | ❌ Mismatch (`psycopg2-binary` in requirements, MySQL in settings) |
+| Real payment gateway integration | ❌ Payments are simulated |
 
 ## Known Limitations
 
-This project is a functional prototype and has not been hardened for production use:
+- **No authorization checks on most admin and vendor views.** Routes like `approve_vendor`, `delete_product`, and `admin_orders` don't verify the requester is logged in with the right role, so anyone who knows or guesses a URL can call them directly.
+- **`DEBUG = True` and the Django `SECRET_KEY` are still committed in `settings.py`.** Move both to environment variables before deploying anywhere public, and rotate the secret key since the old one has been exposed.
+- **`requirements.txt` lists `psycopg2-binary`** (a PostgreSQL driver) while `settings.py` is configured for MySQL. Reconcile depending on your target database.
+- **Payments are simulated** and not connected to a real payment gateway.
 
-- Passwords are stored and compared as plain text rather than hashed.
-- Admin credentials are hardcoded in the source.
-- Many admin/vendor management views do not check that the requester is authenticated or authorized before acting.
-- `DEBUG` is enabled and the Django `SECRET_KEY` is committed to the repository.
-- `requirements.txt` lists a PostgreSQL driver (`psycopg2-binary`) while `settings.py` is configured for MySQL — reconcile depending on your target database.
-- Payments are simulated and are not connected to a real payment gateway.
-
-Before deploying this publicly, address the items above: hash passwords (e.g. with Django's built-in auth/password hashers), move secrets to environment variables, set `DEBUG = False`, restrict `ALLOWED_HOSTS`, and add proper authentication/permission checks to every admin and vendor view.
+Before deploying this publicly, address the remaining items above, restrict `ALLOWED_HOSTS`, and add authentication/permission checks (e.g. `admin_required` / `vendor_required` decorators) to every admin and vendor view.
 
