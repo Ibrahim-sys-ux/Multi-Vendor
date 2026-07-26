@@ -714,9 +714,11 @@ def edit_customer_profile(request):
         if 'profile_photo' in request.FILES:
             cust.profile_photo = request.FILES['profile_photo']  # Save new profile photo
 
+        from django.contrib.auth.hashers import make_password
+
         new_password = request.POST.get("userpass")
         if new_password:
-            cust.userpass = new_password  # Update password only if provided
+            cust.userpass = make_password(new_password)  # hash before saving  # Update password only if provided
 
         cust.save()
         messages.success(request, "Profile updated successfully!")
