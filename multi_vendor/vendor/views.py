@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from decimal import Decimal
 from .forms import ProductForm
 from django.db.models import Sum, Count
+from django.contrib.auth.hashers import make_password
 
 
 
@@ -714,7 +715,7 @@ def edit_customer_profile(request):
         if 'profile_photo' in request.FILES:
             cust.profile_photo = request.FILES['profile_photo']  # Save new profile photo
 
-        from django.contrib.auth.hashers import make_password
+
 
         new_password = request.POST.get("userpass")
         if new_password:
