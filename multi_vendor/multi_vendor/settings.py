@@ -75,13 +75,13 @@ WSGI_APPLICATION = 'multi_vendor.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':'vendor_db',
-        'HOST':'localhost',
-
-        'HOST':'127.0.0.1',
-        'PORT':'3306',
-        'OPTIONS':{
-            'init_command':"SET sql_mode='STRICT_TRANS_TABLES'",
+        'NAME': config('DB_NAME', default='vendor_db'),
+        'HOST': config('DB_HOST', default='127.0.0.1'),
+        'USER': config('DB_USER', default='root'),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'PORT': config('DB_PORT', default='3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
     }
 }
