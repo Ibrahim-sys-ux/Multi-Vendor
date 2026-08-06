@@ -576,7 +576,9 @@ def shop_reviews(request):
 # ✅ Approve a review
 @vendor_required
 def approve_reviews(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
+    shop_email = request.session.get("semail")
+    shop = get_object_or_404(shopdata, useremail=shop_email)
+    review = get_object_or_404(Review, id=review_id, product__shop=shop)  # scoped through product → shop
     review.status = "Approved"
     review.save()
     messages.success(request, "Review approved successfully!")
