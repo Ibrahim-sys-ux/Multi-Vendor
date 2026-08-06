@@ -588,7 +588,9 @@ def approve_reviews(request, review_id):
 # ✅ Reject a review
 @vendor_required
 def reject_reviews(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
+    shop_email = request.session.get("semail")
+    shop = get_object_or_404(shopdata, useremail=shop_email)
+    review = get_object_or_404(Review, id=review_id, product__shop=shop)
     review.status = "Rejected"
     review.save()
     messages.success(request, "Review rejected!")
@@ -598,10 +600,13 @@ def reject_reviews(request, review_id):
 # ✅ Delete a review
 @vendor_required
 def delete_reviews(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
+    shop_email = request.session.get("semail")
+    shop = get_object_or_404(shopdata, useremail=shop_email)
+    review = get_object_or_404(Review, id=review_id, product__shop=shop)
     review.delete()
     messages.success(request, "Review deleted successfully!")
     return redirect("shop_reviews")
+
 @vendor_required
 def shop_report(request):
     shop_email = request.session.get("semail")
