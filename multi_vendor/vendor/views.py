@@ -11,7 +11,7 @@ from decimal import Decimal
 from .forms import ProductForm
 from django.db.models import Sum, Count
 from django.contrib.auth.hashers import make_password
-
+from .decorators import admin_required, vendor_required, customer_required
 
 
 def index(request):
