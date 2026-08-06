@@ -232,7 +232,7 @@ def contact_view(request):
         return redirect("contact")
 
     return render(request, "contact.html")
-
+@admin_required
 def contact_list(request):
     contacts = Contact.objects.all().order_by("-created_at")  # Fetch contacts sorted by latest first
     return render(request, "contact_list.html", {"contacts": contacts})
