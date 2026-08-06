@@ -6,7 +6,7 @@ A multi-vendor e-commerce marketplace built with **Django**, supporting three ro
 
 ### Customer
 - Registration and login
-- Browse shops and products
+- Browse shops and products (no login required)
 - Search shops
 - Add to cart, checkout, and place orders
 - View order history and make payments
@@ -54,6 +54,7 @@ multi_vendor/
 ├── vendor/                # Main app (models, views, forms, urls)
 │   ├── models.py
 │   ├── views.py
+│   ├── decorators.py       # role-based access control (admin/vendor/customer)
 │   ├── forms.py
 │   ├── urls.py
 │   └── migrations/
@@ -142,6 +143,16 @@ Back up your database before running this. It's safe to run more than once — a
 ### Default Admin Login
 The site admin dashboard (separate from Django's own `/admin/`) is accessed via the regular login form, using the `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` values set in your environment.
 
+## Access Control
+
+Every view in `vendor/views.py` is protected by one of three decorators, defined in `vendor/decorators.py`:
+
+- `@admin_required` — restricted to the logged-in admin session
+- `@vendor_required` — restricted to a logged-in vendor; order, product, and review actions are additionally scoped so a vendor can only act on records belonging to their own shop
+- `@customer_required` — restricted to a logged-in customer; cart, wishlist, and payment actions are scoped to the logged-in customer's own records
+
+Public browsing routes (shop listings, shop/product detail pages, approved reviews) intentionally remain open with no login required, matching how real marketplaces let visitors browse before signing in.
+
 ## Security Status
 
 | Item | Status |
@@ -149,17 +160,21 @@ The site admin dashboard (separate from Django's own `/admin/`) is accessed via 
 | Passwords hashed on signup, login, and profile update | ✅ Fixed |
 | Admin credentials moved out of source code | ✅ Fixed (requires `.env` setup above) |
 | Migration path for pre-existing plaintext passwords | ✅ Available (`hash_existing_passwords` command) |
-| Permission checks on admin/vendor views | ❌ Not yet implemented |
+| Permission checks on admin/vendor/customer views | ✅ Fixed — all views gated by role decorators, with object-level ownership checks on orders, products, reviews, cart, wishlist, and payments |
 | `DEBUG` / `SECRET_KEY` moved to environment variables | ❌ Not yet implemented |
 | Database driver matches configured database | ❌ Mismatch (`psycopg2-binary` in requirements, MySQL in settings) |
 | Real payment gateway integration | ❌ Payments are simulated |
 
 ## Known Limitations
 
-- **No authorization checks on most admin and vendor views.** Routes like `approve_vendor`, `delete_product`, and `admin_orders` don't verify the requester is logged in with the right role, so anyone who knows or guesses a URL can call them directly.
 - **`DEBUG = True` and the Django `SECRET_KEY` are still committed in `settings.py`.** Move both to environment variables before deploying anywhere public, and rotate the secret key since the old one has been exposed.
 - **`requirements.txt` lists `psycopg2-binary`** (a PostgreSQL driver) while `settings.py` is configured for MySQL. Reconcile depending on your target database.
 - **Payments are simulated** and not connected to a real payment gateway.
+- **`api/index.py` (Vercel entry point) has a broken import** — it imports from `myproject.wsgi`, but the actual project package is `multi_vendor`. Fix before attempting a Vercel deployment.
+- **No automated tests** — `tests.py` exists but is currently empty.
 
-Before deploying this publicly, address the remaining items above, restrict `ALLOWED_HOSTS`, and add authentication/permission checks (e.g. `admin_required` / `vendor_required` decorators) to every admin and vendor view.
+Before deploying this publicly, address the remaining items above and restrict `ALLOWED_HOSTS`.
 
+## License
+
+No license specified yet — add one if you intend for others to use or contribute to this project.
