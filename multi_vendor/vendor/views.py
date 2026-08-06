@@ -385,9 +385,6 @@ def shophome(request):
     shop_email = request.session.get("semail")  # Get vendor email from session
     shop = shopdata.objects.filter(useremail=shop_email).first()  # Get the first matching shop
 
-    if not shop:
-        return redirect("signup2")  # Redirect to shop registration if no shop found
-
     products = Product.objects.filter(shop=shop)  # Get products linked to this shop
 
     context = {
@@ -398,8 +395,6 @@ def shophome(request):
 
 @vendor_required
 def shop_profile(request):
-    if "semail" not in request.session:  # Ensure vendor is logged in
-        return redirect("/login/")
 
     vendor_email = request.session["semail"]
     shop = shopdata.objects.filter(useremail=vendor_email).first()  # Get shop or None
@@ -415,10 +410,6 @@ def edit_shop_profile(request):
 
     vendor_email = request.session["semail"]
     shop = shopdata.objects.filter(useremail=vendor_email).first()
-
-    if not shop:
-        messages.error(request, "Shop profile not found!")
-        return redirect("/dashboard/")
 
     if request.method == "POST":
         shopname = request.POST.get("shopname", "").strip()
@@ -455,18 +446,11 @@ def edit_shop_profile(request):
 
     return render(request, "shop_edit_profile.html", {"shop": shop})
 
-
-
-
 # ✅ View only products belonging to the shop
 @vendor_required
 def product_list(request):
     shop_email = request.session.get("semail")
     shop = shopdata.objects.filter(useremail=shop_email).first()  # Get the first matching shop
-
-    if not shop:
-        return redirect("signup2")  # Redirect if no shop found
-
     products = Product.objects.filter(shop=shop)  # Fetch products for the shop
     return render(request, "shop_products.html", {"products": products, "shop": shop})
 
@@ -475,9 +459,6 @@ def product_list(request):
 def add_product(request):
     shop_email = request.session.get("semail")
     shop = shopdata.objects.filter(useremail=shop_email).first()
-
-    if not shop:
-        return redirect("signup2")
 
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
@@ -498,9 +479,6 @@ def edit_product(request, product_id):
     shop_email = request.session.get("semail")
     shop = shopdata.objects.filter(useremail=shop_email).first()
 
-    if not shop:
-        return redirect("signup2")
-
     product = get_object_or_404(Product, id=product_id, shop=shop)
 
     if request.method == "POST":
@@ -519,9 +497,6 @@ def edit_product(request, product_id):
 def delete_product(request, product_id):
     shop_email = request.session.get("semail")
     shop = shopdata.objects.filter(useremail=shop_email).first()
-
-    if not shop:
-        return redirect("signup2")
 
     product = get_object_or_404(Product, id=product_id, shop=shop)
     product.delete()
@@ -696,8 +671,6 @@ def custhome(request):
 
 @customer_required
 def customer_profile(request):
-    if "uemail" not in request.session:  # Ensure customer is logged in
-        return redirect("/login/")
 
     customer_email = request.session["uemail"]
     cust = custdata.objects.filter(useremail=customer_email).first()
@@ -707,9 +680,6 @@ def customer_profile(request):
 def edit_customer_profile(request):
     cust_email = request.session.get("uemail")  # Get customer email from session
     cust = custdata.objects.filter(useremail=cust_email).first()
-
-    if not cust:
-        return redirect("login")  # Redirect to login if customer not found
 
     if request.method == "POST":
         cust.username = request.POST.get("username")
@@ -729,12 +699,12 @@ def edit_customer_profile(request):
         return redirect("customer_profile")
 
     return render(request, "editcustprofile.html", {"cust": cust})
-@customer_required
+
 def shop_list(request):
     shops = shopdata.objects.filter(userstatus='active')  # Show only approved shops
     return render(request, "shop_list.html", {"shops": shops})
 
-@customer_required
+
 def shop_details(request, shop_id):
     shop = get_object_or_404(shopdata, id=shop_id)
     products = Product.objects.filter(shop=shop)
@@ -743,15 +713,13 @@ def shop_details(request, shop_id):
     cart_message = request.session.pop("cart_message", None)
 
     return render(request, "shop_details.html", {"shop": shop, "products": products, "cart_message": cart_message})
-@customer_required
+
 def product_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     return render(request, "product_details.html", {"product": product})
 @customer_required
 def add_to_cart(request, product_id):
-    if "uemail" not in request.session:
-        messages.error(request, "You must be logged in to add to cart.")
-        return redirect("login")
+
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -774,8 +742,6 @@ def add_to_cart(request, product_id):
     return redirect("shop_details", shop_id=product.shop.id)
 @customer_required
 def view_cart(request):
-    if "uemail" not in request.session:
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -797,8 +763,6 @@ def remove_from_cart(request, cart_id):
 
 @customer_required
 def checkout(request):
-    if "uemail" not in request.session:
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.get(useremail=customer_email)
@@ -833,8 +797,6 @@ def order_success(request):
     return render(request, "order_success.html")
 @customer_required
 def customer_orders(request):
-    if "uemail" not in request.session:
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -844,7 +806,8 @@ def customer_orders(request):
     return render(request, "customer_orders.html", {"orders": orders})
 @customer_required
 def make_transaction(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
+    customer_email = request.session["uemail"]
+    order = get_object_or_404(Order, id=order_id, customer_email=customer_email)  # ✅ scoped
 
     if order.delivery_status != "Delivered":
         messages.error(request, "Transaction is only available for delivered orders.")
@@ -855,15 +818,13 @@ def make_transaction(request, order_id):
 from django.http import HttpResponse
 @customer_required
 def process_payment(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-
-    # Simulating a successful payment process (replace this with actual payment gateway logic)
-    order.is_paid = True  # ✅ Mark order as paid
+    customer_email = request.session["uemail"]
+    order = get_object_or_404(Order, id=order_id, customer_email=customer_email)  # ✅ scoped
+    order.is_paid = True
     order.save()
 
-    # ✅ Create a transaction record
     transaction = Transaction.objects.create(
-        useremail=order.customer_email,  # Assuming order has a ForeignKey to User
+        useremail=order.customer_email,
         order=order,
         amount=order.total_price,
         status="completed",
@@ -871,13 +832,9 @@ def process_payment(request, order_id):
     )
     transaction.save()
     messages.success(request, f"Payment successful for Order ID: {order_id}")
-
     return redirect("customer_orders")
 @customer_required
 def add_to_wishlist(request, product_id):
-    if "uemail" not in request.session:
-        messages.error(request, "You must be logged in to add to wishlist.")
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -893,8 +850,6 @@ def add_to_wishlist(request, product_id):
     return redirect("shop_details", shop_id=product.shop.id)  # Redirect back to shop detail page
 @customer_required
 def view_wishlist(request):
-    if "uemail" not in request.session:
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -909,16 +864,13 @@ def remove_from_wishlist(request, wishlist_id):
     wishlist_item.delete()
     messages.success(request, "Item removed from wishlist!")
     return redirect("view_wishlist")
-@customer_required
+
 def product_reviews(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     reviews = Review.objects.filter(product=product, status="Approved")  # Only show approved reviews
     return render(request, "reviews.html", {"product": product, "reviews": reviews})
 @customer_required
 def submit_review(request, product_id):
-    if "uemail" not in request.session:
-        messages.error(request, "You must be logged in to submit a review.")
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -943,9 +895,6 @@ def submit_review(request, product_id):
     return redirect("product_reviews", product_id=product.id)
 @customer_required
 def submit_complaint(request):
-    if "uemail" not in request.session:
-        messages.error(request, "You must be logged in to submit a complaint.")
-        return redirect("login")
 
     customer_email = request.session["uemail"]
     customer = custdata.objects.filter(useremail=customer_email).first()
@@ -971,7 +920,7 @@ def submit_complaint(request):
     complaints = Complaint.objects.filter(user=customer).order_by("-created_at")
 
     return render(request, "submit_complaint.html", {"complaints": complaints})
-@customer_required
+
 def cproduct_list(request):
     products = Product.objects.prefetch_related("reviews").all()
     return render(request, "product_list.html", {"products": products})
