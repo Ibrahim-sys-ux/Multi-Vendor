@@ -287,7 +287,7 @@ def admin_products(request):
 
 
 
-def edit_product(request, product_id):
+def admin_edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     categories = Category.objects.all()
 
@@ -311,7 +311,7 @@ def edit_product(request, product_id):
 
     return render(request, "edit_product.html", {"product": product, "categories": categories})
 
-def delete_product(request, product_id):
+def admin_delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product.delete()
     messages.success(request, "Product deleted successfully!")
@@ -332,7 +332,7 @@ def update_order(request, order_id):
     
     return render(request, 'update_order.html', {'order': order})
 
-def delete_order(request, order_id):
+def admin_delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     order.delete()
     messages.success(request, "Order deleted successfully!")
