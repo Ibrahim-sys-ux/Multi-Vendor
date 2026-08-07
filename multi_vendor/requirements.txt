@@ -1,4 +1,4 @@
 Django
 whitenoise
-psycopg2-binary
+mysqlclient
 python-decouple
