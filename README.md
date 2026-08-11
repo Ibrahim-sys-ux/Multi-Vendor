@@ -155,23 +155,23 @@ Public browsing routes (shop listings, shop/product detail pages, approved revie
 
 ## Security Status
 
-| Item | Status |
-|---|---|
-| Passwords hashed on signup, login, and profile update | ✅ Fixed |
-| Admin credentials moved out of source code | ✅ Fixed (requires `.env` setup above) |
-| Migration path for pre-existing plaintext passwords | ✅ Available (`hash_existing_passwords` command) |
-| Permission checks on admin/vendor/customer views | ✅ Fixed — all views gated by role decorators, with object-level ownership checks on orders, products, reviews, cart, wishlist, and payments |
-| `DEBUG` / `SECRET_KEY` moved to environment variables | ❌ Not yet implemented |
-| Database driver matches configured database | ❌ Mismatch (`psycopg2-binary` in requirements, MySQL in settings) |
-| Real payment gateway integration | ❌ Payments are simulated |
+| Item                                                  | Status                                                           |
+| ----------------------------------------------------- | ---------------------------------------------------------------- |
+| Passwords hashed on signup, login, and profile update | ✅ Fixed                                                          |
+| Admin credentials moved out of source code            | ✅ Fixed — uses environment variables                             |
+| Migration path for pre-existing plaintext passwords   | ✅ Available — `hash_existing_passwords` command                  |
+| Permission checks on admin/vendor/customer views      | ✅ Fixed — role-based and object-level access control implemented |
+| `DEBUG` / `SECRET_KEY` moved to environment variables | ✅ Fixed                                                          |
+| Database driver matches configured database           | ✅ Fixed — MySQL configuration and driver are aligned             |
+| Real payment gateway integration                      | ❌ Payments are simulated                                         |
 
 ## Known Limitations
 
-- **`DEBUG = True` and the Django `SECRET_KEY` are still committed in `settings.py`.** Move both to environment variables before deploying anywhere public, and rotate the secret key since the old one has been exposed.
-- **`requirements.txt` lists `psycopg2-binary`** (a PostgreSQL driver) while `settings.py` is configured for MySQL. Reconcile depending on your target database.
-- **Payments are simulated** and not connected to a real payment gateway.
-- **`api/index.py` (Vercel entry point) has a broken import** — it imports from `myproject.wsgi`, but the actual project package is `multi_vendor`. Fix before attempting a Vercel deployment.
-- **No automated tests** — `tests.py` exists but is currently empty.
+* Payments are currently simulated and are not connected to a real payment gateway.
+* No automated tests are currently implemented; `tests.py` is empty.
+* Production deployment requires appropriate `ALLOWED_HOSTS` configuration.
+* Uploaded media files require proper storage configuration for production deployment.
+* The application is primarily designed as a Django web application and does not currently provide a dedicated REST API.
 
 Before deploying this publicly, address the remaining items above and restrict `ALLOWED_HOSTS`.
 
