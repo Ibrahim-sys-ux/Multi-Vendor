@@ -1,4 +1,4 @@
 Django
 whitenoise
-mysqlclient
+PyMySQL
 python-decouple
