@@ -1,3 +1,2 @@
-from myproject.wsgi import application
-
+from multi_vendor.wsgi import application
 app = application
