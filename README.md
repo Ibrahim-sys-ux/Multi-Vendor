@@ -37,8 +37,9 @@ A multi-vendor e-commerce marketplace built with **Django**, supporting three ro
 ## Tech Stack
 
 - **Backend:** Django 5.1
-- **Database:** MySQL (configured in `settings.py`)
+- **Database:** MySQL (via `mysqlclient`)
 - **Static files:** WhiteNoise
+- **Config management:** python-decouple (environment variables)
 - **Deployment:** Configured for Vercel (`vercel.json`)
 
 ## Project Structure
@@ -82,7 +83,7 @@ multi_vendor/
 
 ### Prerequisites
 - Python 3.12+
-- MySQL server running locally (or update `DATABASES` in `settings.py` to match your setup)
+- MySQL server running locally (or update your `.env` to match a remote instance)
 
 ### Setup
 
@@ -100,7 +101,40 @@ pip install -r requirements.txt
 
 # Create the database
 # In MySQL: CREATE DATABASE vendor_db;
+```
 
+### Environment Variables
+
+All secrets and environment-specific values are read from a `.env` file (already excluded via `.gitignore` — never commit this file). Create one in the project root with:
+
+```
+DJANGO_SECRET_KEY=<generate one, see below>
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+DB_NAME=vendor_db
+DB_HOST=127.0.0.1
+DB_USER=root
+DB_PASSWORD=<your MySQL password>
+DB_PORT=3306
+
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD_HASH=<generate with make_password(), see below>
+```
+
+Generate a fresh Django secret key:
+```bash
+python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Generate the admin password hash:
+```bash
+python manage.py shell -c "from django.contrib.auth.hashers import make_password; print(make_password('your-real-admin-password'))"
+```
+
+### Running the app
+
+```bash
 # Apply migrations
 python manage.py migrate
 
@@ -113,23 +147,6 @@ python manage.py runserver
 
 The app will be available at `http://127.0.0.1:8000/`.
 
-### Environment Variables
-
-Passwords and admin credentials are no longer hardcoded. Create a `.env` file in the project root (and make sure it's listed in `.gitignore`) with:
-
-```
-ADMIN_EMAIL=admin@gmail.com
-ADMIN_PASSWORD_HASH=<generate with make_password(), see below>
-DJANGO_SECRET_KEY=<your-secret-key>
-DJANGO_DEBUG=False
-```
-
-Generate the admin password hash once with:
-
-```bash
-python manage.py shell -c "from django.contrib.auth.hashers import make_password; print(make_password('your-real-admin-password'))"
-```
-
 ### Migrating Existing Accounts
 
 If you have accounts created before password hashing was added, run the one-off migration command to hash any remaining plaintext passwords:
@@ -141,7 +158,7 @@ python manage.py hash_existing_passwords
 Back up your database before running this. It's safe to run more than once — already-hashed passwords are left untouched.
 
 ### Default Admin Login
-The site admin dashboard (separate from Django's own `/admin/`) is accessed via the regular login form, using the `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` values set in your environment.
+The site admin dashboard (separate from Django's own `/admin/`) is accessed via the regular login form, using the `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` values set in your `.env`.
 
 ## Access Control
 
@@ -155,25 +172,25 @@ Public browsing routes (shop listings, shop/product detail pages, approved revie
 
 ## Security Status
 
-| Item                                                  | Status                                                           |
-| ----------------------------------------------------- | ---------------------------------------------------------------- |
-| Passwords hashed on signup, login, and profile update | ✅ Fixed                                                          |
-| Admin credentials moved out of source code            | ✅ Fixed — uses environment variables                             |
-| Migration path for pre-existing plaintext passwords   | ✅ Available — `hash_existing_passwords` command                  |
-| Permission checks on admin/vendor/customer views      | ✅ Fixed — role-based and object-level access control implemented |
-| `DEBUG` / `SECRET_KEY` moved to environment variables | ✅ Fixed                                                          |
-| Database driver matches configured database           | ✅ Fixed — MySQL configuration and driver are aligned             |
-| Real payment gateway integration                      | ❌ Payments are simulated                                         |
+| Item | Status |
+|---|---|
+| Passwords hashed on signup, login, and profile update | ✅ Fixed |
+| Admin credentials moved out of source code | ✅ Fixed |
+| Migration path for pre-existing plaintext passwords | ✅ Available (`hash_existing_passwords` command) |
+| Permission checks on admin/vendor/customer views | ✅ Fixed — all views gated by role decorators, with object-level ownership checks on orders, products, reviews, cart, wishlist, and payments |
+| `SECRET_KEY` / `DEBUG` / `ALLOWED_HOSTS` in environment variables | ✅ Fixed |
+| Database credentials in environment variables | ✅ Fixed |
+| `requirements.txt` matches configured database | ✅ Fixed (`mysqlclient` for MySQL) |
+| Committed virtual environment removed from repo | ✅ Fixed (132MB → 42MB) |
+| `.gitignore` configured | ✅ Fixed |
+| Real payment gateway integration | ❌ Payments are simulated (`process_payment` marks orders paid without a gateway) |
 
 ## Known Limitations
 
-* Payments are currently simulated and are not connected to a real payment gateway.
-* No automated tests are currently implemented; `tests.py` is empty.
-* Production deployment requires appropriate `ALLOWED_HOSTS` configuration.
-* Uploaded media files require proper storage configuration for production deployment.
-* The application is primarily designed as a Django web application and does not currently provide a dedicated REST API.
-
-Before deploying this publicly, address the remaining items above and restrict `ALLOWED_HOSTS`.
+- **Payments are simulated** — `process_payment` marks an order as paid directly, with no integration to a real payment gateway (e.g. Stripe, Razorpay). Fine for demonstration purposes; would need real gateway + webhook integration before handling real transactions.
+- **`api/index.py` (Vercel entry point) has a broken import** — it imports from `myproject.wsgi`, but the actual project package is `multi_vendor`. Fix before attempting a Vercel deployment.
+- **No automated tests** — `tests.py` exists but is currently empty.
+- **Old `SECRET_KEY` remains in git history** — the exposed key was rotated, but the previous value is still visible in earlier commits. Not in active use, but full removal would require rewriting git history.
 
 ## License
 
