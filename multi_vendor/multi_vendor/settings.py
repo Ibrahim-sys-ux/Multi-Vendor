@@ -128,7 +128,7 @@ STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
 
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
